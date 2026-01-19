@@ -1,0 +1,36 @@
+{
+  "name": "x-pds",
+  "version": "0.0.0",
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "scripts": {
+    "dev": "tsx watch --clear-screen=false src/index.ts",
+    "tsc": "tsc -b",
+    "build": "tsup --dts",
+    "build:server": "tsup",
+    "start": "node dist/index.js",
+    "clean": "rm -rf node_modules dist tsconfig.tsbuildinfo"
+  },
+  "type": "commonjs",
+  "dependencies": {
+    "@atproto/oauth-provider": "workspace:*",
+    "@atproto/pds": "workspace:*",
+    "dotenv": "^17.2.3",
+    "express": "^4.17.2"
+  },
+  "devDependencies": {
+    "@types/express": "^4.17.13",
+    "tsup": "^8.5.1",
+    "tsx": "^4.21.0"
+  },
+  "tsup": {
+    "entry": [
+      "src/index.ts"
+    ],
+    "splitting": false,
+    "sourcemap": true,
+    "clean": true
+  }
+}
