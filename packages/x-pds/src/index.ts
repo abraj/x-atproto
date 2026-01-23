@@ -18,7 +18,7 @@ const main = async () => {
   const cfg = envToCfg(env)
   const secrets = envToSecrets(env)
 
-  console.log('----->> create: 1.7..')
+  console.log('----->> create: 1.3..')
   const ctx = await AppContext.fromConfig(cfg, secrets)
 
   const app = express()

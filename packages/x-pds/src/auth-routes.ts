@@ -29,6 +29,10 @@ export const createRouter = ({ oauthProvider, cfg }: AppContext): Router => {
     throw new Error('Resource URL must use the https scheme')
   }
 
+  router.use((req, res, next) => {
+    console.log('---> req:', req.method, req.path, req.body)
+    next()
+  })
   router.get('/.well-known/oauth-protected-resource', (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*')
     res.setHeader('Access-Control-Allow-Method', '*')

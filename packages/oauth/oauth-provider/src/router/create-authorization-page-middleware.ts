@@ -58,6 +58,7 @@ export function createAuthorizationPageMiddleware<
       validateFetchDest(req, ['document'])
       validateOrigin(req, issuerOrigin)
 
+      console.log('  ~~ /oauth/authorize:', req.method, (req as any).path)
       const query = Object.fromEntries(this.url.searchParams)
 
       const clientCredentials = await oauthClientCredentialsSchema
