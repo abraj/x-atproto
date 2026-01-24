@@ -150,12 +150,15 @@ export function createOAuthMiddleware<
         req.headers,
       )
 
-      return server.token(
+      const xx = server.token(
         clientCredentials,
         clientMetadata,
         tokenRequest,
         dpopProof,
       )
+      console.log('token:', xx)
+
+      return xx
     }),
   )
 
@@ -218,6 +221,9 @@ export function createOAuthMiddleware<
         }
 
         const json = await buildOAuthResponse.call(this, req, res)
+        console.log('json:', json)
+        console.log('status:', status)
+
         return { json, status }
       } catch (err) {
         onError?.(

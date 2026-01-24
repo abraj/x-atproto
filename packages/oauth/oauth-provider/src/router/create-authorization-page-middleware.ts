@@ -64,6 +64,7 @@ export function createAuthorizationPageMiddleware<
       const clientCredentials = await oauthClientCredentialsSchema
         .parseAsync(query, { path: ['query'] })
         .catch((err) => throwInvalidRequest(err, 'Invalid client credentials'))
+      console.log('  ~~ clientCredentials:', clientCredentials)
 
       if ('client_secret' in clientCredentials) {
         throw new InvalidRequestError('Client secret must not be provided')
@@ -72,9 +73,10 @@ export function createAuthorizationPageMiddleware<
       const authorizationRequest = await oauthAuthorizationRequestQuerySchema
         .parseAsync(query, { path: ['query'] })
         .catch((err) => throwInvalidRequest(err, 'Invalid request parameters'))
+      console.log('  ~~ authorizationRequest:', authorizationRequest)
 
       const deviceInfo = await server.deviceManager.load(req, res)
-
+      console.log('  ~~ deviceInfo:', deviceInfo)
       try {
         const result = await server.authorize(
           clientCredentials,
@@ -82,10 +84,12 @@ export function createAuthorizationPageMiddleware<
           deviceInfo.deviceId,
           deviceInfo.deviceMetadata,
         )
+        console.log('  ~~ result:', result)
 
         if ('redirect' in result) {
           return sendAuthorizeRedirect(res, result)
         } else {
+          console.log('101/')
           return sendAuthorizePage(req, res, result)
         }
       } catch (err) {
@@ -126,10 +130,17 @@ export function createAuthorizationPageMiddleware<
         pathname: '/oauth/authorize',
       })
 
-      // Ensure we are coming from the authorization page
-      requestUriSchema.parse(referrer.searchParams.get('request_uri'))
+      const x1 = referrer.searchParams.get('request_uri')
+      console.log('x1:', x1)
 
-      return sendRedirect(res, parseRedirectUrl(this.url))
+      // Ensure we are coming from the authorization page
+      requestUriSchema.parse(x1)
+
+      console.log('xx:', this.url)
+      const x2 = parseRedirectUrl(this.url)
+      console.log('x2:', x2)
+
+      return sendRedirect(res, x2)
     }),
   )
 

@@ -101,6 +101,8 @@ function writeQuery(
 ): void {
   const url = new URL(uri)
   for (const [key, value] of params) url.searchParams.set(key, value)
+  console.log('href:', url.href)
+
   res.writeHead(REDIRECT_STATUS_CODE, { Location: url.href }).end()
 }
 

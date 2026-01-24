@@ -604,15 +604,18 @@ export class OAuthProvider extends OAuthVerifier {
     const client = await this.clientManager
       .getClient(clientCredentials.client_id)
       .catch(throwAuthorizationError)
+    console.log('  -- client:', client)
 
     const { parameters, requestUri } = await this.processAuthorizationRequest(
       client,
       deviceId,
       query,
     ).catch(throwAuthorizationError)
+    console.log('  -- parameters:', parameters)
 
     try {
       const sessions = await this.getSessions(client.id, deviceId, parameters)
+      console.log('  -- sessions:', sessions)
 
       if (parameters.prompt === 'none') {
         const ssoSessions = sessions.filter((s) => s.matchesHint)
@@ -715,6 +718,8 @@ export class OAuthProvider extends OAuthVerifier {
   > {
     const deviceAccounts =
       await this.accountManager.listDeviceAccounts(deviceId)
+    console.log('  -- deviceId:', deviceId)
+    console.log('  -- deviceAccounts:', deviceAccounts)
 
     const hint = parameters.login_hint
     const matchesHint = (account: Account): boolean =>

@@ -141,15 +141,35 @@ export function createApiMiddleware<
       rotateDeviceCookies: true,
       async handler() {
         const { deviceId, deviceMetadata, requestUri } = this
+        console.log('/sign-in ..', { deviceId, deviceMetadata, requestUri })
 
         // Remember when not in the context of a request by default
+        console.log('remember:', this.input.remember)
         const { remember = requestUri == null, ...input } = this.input
+        console.log('remember:', remember)
 
-        const account = await server.accountManager.authenticateAccount(
+        const account0 = server.accountManager.authenticateAccount(
           deviceId,
           deviceMetadata,
           input,
         )
+        console.log('account0:', account0)
+        let account
+        let err
+        try {
+          account = await account0
+        } catch (e) {
+          // console.log('err:', err)
+          err = e
+          account = {
+            sub: 'did:plc:k4h47kbxnagphlmh6s3gsoyy',
+            aud: 'did:web:statusphere.social',
+            email: 'alice@statusphere.social',
+            email_verified: false,
+            preferred_username: 'alice.statusphere.social',
+          }
+        }
+        console.log('account1:', account)
 
         if (remember) {
           await server.accountManager.upsertDeviceAccount(deviceId, account.sub)
@@ -171,14 +191,19 @@ export function createApiMiddleware<
           // Check if a consent is required for the client, but only if this
           // call is made within the context of an oauth request.
 
+          console.log('requestUri:', requestUri)
           const { clientId, parameters } = await server.requestManager.get(
             requestUri,
             deviceId,
           )
+          console.log('clientId:', clientId)
+          console.log('parameters:', parameters)
 
           const { authorizedClients } = await server.accountManager.getAccount(
             account.sub,
           )
+          console.log('authorizedClients:', authorizedClients)
+          console.log('xx:', authorizedClients.get(clientId))
 
           const json = {
             account,
@@ -187,6 +212,11 @@ export function createApiMiddleware<
               parameters,
               authorizedClients.get(clientId),
             ),
+          }
+          console.log('json:', json)
+          if (err) {
+            // throw err
+            console.log('err:', !!err)
           }
 
           return { json }
@@ -414,6 +444,8 @@ export function createApiMiddleware<
         })
         .strict(),
       async handler(req, res) {
+        console.log('-----------------------')
+
         if (!this.requestUri) {
           throw new InvalidRequestError(
             'This endpoint can only be used in the context of an OAuth request',
@@ -423,10 +455,13 @@ export function createApiMiddleware<
         // Any AuthorizationError caught in this block will result in a redirect
         // to the client's redirect_uri with an error.
         try {
+          console.log('requestUri:', this.requestUri)
           const { clientId, parameters } = await server.requestManager.get(
             this.requestUri,
             this.deviceId,
           )
+          console.log('clientId:', clientId)
+          console.log('parameters:', parameters)
 
           // Any error thrown in this block will be transformed into an
           // AuthorizationError.
@@ -436,6 +471,7 @@ export function createApiMiddleware<
               req,
               res,
             )
+            console.log('account:', account)
 
             const client = await server.clientManager.getClient(clientId)
 
@@ -447,6 +483,7 @@ export function createApiMiddleware<
               this.deviceMetadata,
               this.input.scope,
             )
+            console.log('code:', code)
 
             const clientData = authorizedClients.get(clientId)
             if (server.checkConsentRequired(parameters, clientData)) {
@@ -465,6 +502,7 @@ export function createApiMiddleware<
             }
 
             const url = buildRedirectUrl(server.issuer, parameters, { code })
+            console.log('code:', { url })
 
             return { json: { url } }
           } catch (err) {

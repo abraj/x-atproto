@@ -33,6 +33,7 @@ export function sendAuthorizePageFactory(customization: Customization) {
   ): Promise<void> {
     await setupCsrfToken(req, res)
 
+    console.log('102/')
     const script = declareHydrationData<HydrationData['authorization-page']>({
       __customizationData: customizationData,
       __authorizeData: {
