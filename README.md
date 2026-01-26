@@ -1,5 +1,83 @@
 # AT Protocol Reference Implementation (TypeScript)
 
+```
+git pull origin main
+pnpm --filter ./packages/oauth/oauth-provider run build
+pnpm --filter ./packages/pds run build
+pnpm --filter ./packages/x-pds run build
+pnpm run devx
+```
+
+```
+session:
+	how users are stored? [/sign-in with remeber=true]
+	how saved users are restored? [/oauth/authorize]
+create a dummy /auth/callback route
+	On `/oauth/authorize` response: create a dummy link (for `/auth/callback`)
+	redirect to `/auth/callback` from `/oauth/authorize`
+		assume data loss [later: redirect to canonical PDS/AuthServer]
+	mock user data [later: redirect callback from canonical PDS/AuthServer]
+	# mock: store for user data
+	create `code` [prep for oauth response]
+	redirect to `/oauth/authorize/redirect`
+for `/oauth/authorize/redirect` route
+	temp: allow non-`/oauth/authorize` routes
+	redirect back to `http://127.0.0.1:8080/auth/callback`
+check that `/oauth/token` call from client succeeds
+GET /xrpc/com.atproto.server.getSession
+	test what if AS is different from PDS
+	is it then: PDS//xrpc/com.atproto.server.getSession ?
+GET /xrpc/com.atproto.repo.getRecord
+```
+
+https://example.com/oauth/authorize
+	?client_id=http%3A%2F%2Flocalhost%3Fredirect_uri%3Dhttp%253A%252F%252F127.0.0.1%253A8080%252Fauth%252Fcallback%26scope%3Datproto%2520transition%253Ageneric%2520transition%253Aemail
+	&request_uri=urn%3Aietf%3Aparams%3Aoauth%3Arequest_uri%3Areq-8f4d392c883ddf01281fb5aa9392824c
+
+https://example.com/@atproto/oauth-provider/~api/sign-in
+```
+{
+    "account": {
+        "sub": "did:plc:k4h47kbxnagphlmh6s3gsoyy",
+        "aud": "did:web:example.com",
+        "email": "alice@example.com",
+        "email_verified": false,
+        "preferred_username": "alice.example.com"
+    },
+    "ephemeralToken": "...",
+    "consentRequired": true
+}
+```
+
+https://example.com/@atproto/oauth-provider/~api/consent
+```
+{
+  url: 'https://example.com/oauth/authorize/redirect?redirect_mode=query&redirect_uri=http%3A%2F%2F127.0.0.1%3A8080%2Fauth%2Fcallback&iss=https%3A%2F%2Fexample.com&state=rFUSZZbDp-dKnecLXEdITQ&code=cod-f036ecfa756a6d1e08745f3c2598abb652328e5e421c30794590f626cf17839e'
+}
+```
+
+https://example.com/oauth/authorize/redirect
+	>> http://127.0.0.1:8080/auth/callback?state=qJlHq0eWQw0auUBZEjJasw&iss=https%3A%2F%2Fexample.com&code=cod-fefd66c18de00718e80ffe3c5c314bcd2703472306f452c1f5ddbf72e3fa21d9
+
+http://127.0.0.1:8080/auth/callback
+
+https://example.com/oauth/token
+```
+{
+  access_token: '...',
+  token_type: 'DPoP',
+  refresh_token: 'ref-9b775d99c97',
+  scope: 'atproto transition:email',
+  expires_in: [Getter],
+  sub: 'did:plc:k4h47kbxnagphlmh6s3gsoyy'
+}
+```
+
+> [ui:78] server.deviceManager [dev- and ses- cookies]
+> [op:604] this.clientManager [client metadata]
+> [op:548] this.requestManager [PAR, setAuthorized:code]
+> [op:720,mw:633] this.accountManager [device accounts, get account]
+
 Welcome friends!
 
 This repository contains Bluesky's reference implementation of AT Protocol, and of the `app.bsky` microblogging application service backend.
